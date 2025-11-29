@@ -1,5 +1,7 @@
 import pandas as pd
 import warnings
+import sys, os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from utils.prepare_Data import prepare_data
 from Training.eval import evaluation
