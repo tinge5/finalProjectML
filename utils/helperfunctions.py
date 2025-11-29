@@ -98,13 +98,15 @@ def predict_future(matchups_future, model, scaler, train_cols):
         lambda r: r["posteam_A"] if r["winner"] == "A" else r["posteam_B"],
         axis=1
     )
-
-    # 5. Clean output
-    return df_future[[
+    df_future = df_future[[
         'posteam_A', 'Season_A',
         'posteam_B', 'Season_B',
         'proba_A_wins', 'winner', 'predicted_winner_team'
     ]]
+    df_future.to_csv("Predictions.csv", index=False)
+    
+    return df_future
+    
 
 def CreateGames_df(df):
     games_df = (df.groupby(['GameID', 'posteam'], as_index=False)
