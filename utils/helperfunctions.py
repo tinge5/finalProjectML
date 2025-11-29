@@ -14,8 +14,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
 
-
-
 def create_matchups_with_averages(matchups, games_averages):
     # Merge Team A season averages
     matchups_a = matchups.copy()
@@ -73,68 +71,6 @@ def createMatchups(games):
         suffixes=('_A', '_B')
     )
     return matchups
-
-def training(matchups2009a):
-
-    # 1. Define features and target
-    drop_cols = [
-        'posteam_A','posteam_B','Season_A','Season_B',
-        'index_A','index_B','Win_B','Win_A','GameID','Touchdown','Touchdown_B', 'win', 'win_B'
-    ]
-    X = matchups2009a.drop(columns=drop_cols)
-    y = matchups2009a['Win_A']
-    train_cols = X.columns.tolist()   # keep column order
-    
-
-    # 2. Train/test split BEFORE scaling (correct!)
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
-    )
-
-    # 3. Fit scaler on TRAIN only
-    scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    X_test_scaled  = scaler.transform(X_test)
-
-    # 4. Train models
-    tree = DecisionTreeClassifier(class_weight='balanced', max_depth=9, random_state=42)
-    tree.fit(X_train_scaled, y_train)
-
-    logreg = LogisticRegression(C=1, max_iter=10000, class_weight='balanced')
-    logreg.fit(X_train_scaled, y_train)
-
-    svm = SVC(kernel='rbf', probability=True)
-    svm.fit(X_train_scaled, y_train)
-
-    mlp = MLPClassifier(hidden_layer_sizes=(32,16), max_iter=1000)
-    mlp.fit(X_train_scaled, y_train)
-
-    t = 0
-    for i in range(10):
-        f = accuracy_score(y_test, mlp.predict(X_test_scaled))
-        if f > t:
-            t = f
-
-    # 5. Evaluate
-    print("Decision Tree accuracy:", accuracy_score(y_test, tree.predict(X_test_scaled)))
-    print("LogReg accuracy:", accuracy_score(y_test, logreg.predict(X_test_scaled)))
-    print("SVM accuracy:", accuracy_score(y_test, svm.predict(X_test_scaled)))
-    print("Best MLP accuracy out of 10 tries:", t)
-
-    models = {'Decision Tree': tree, 'LogReg': logreg, 'SVM': svm, 'MLP': mlp}
-    for name, model in models.items():
-        y_pred = model.predict(X_test_scaled)
-        a_win_rate = np.mean(y_pred)
-        b_win_rate = 1 - a_win_rate
-        print(f"{name} predicts Team A wins {a_win_rate:.2%}, Team B wins {b_win_rate:.2%}")
-
-    # 6. Choose best model (example selects logistic regression)
-    best_model = logreg
-
-    # 7. Return everything needed for prediction
-    return best_model, scaler, train_cols
-
-
 def predict_future(matchups_future, model, scaler, train_cols):
     
     df_future = matchups_future.copy()
@@ -208,69 +144,3 @@ def game_avg(games_df):
     games_averages = games_averages.sort_values(by=['win'], ascending=False)
 
     return games_averages
-
-def prepare_data(matchups):
-     # 1. Define features and target
-    drop_cols = [
-        'posteam_A','posteam_B','Season_A','Season_B',
-        'index_A','index_B','Win_B','Win_A','GameID','Touchdown','Touchdown_B', 'win', 'win_B'
-    ]
-    X = matchups.drop(columns=drop_cols)
-    y = matchups['Win_A']
-    train_cols = X.columns.tolist()   # keep column order
-    
-
-    # 2. Train/test split BEFORE scaling (correct!)
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
-    )
-
-    # 3. Fit scaler on TRAIN only
-    scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    X_test_scaled  = scaler.transform(X_test)
-
-    return X_test_scaled, X_train_scaled, y_test, y_train, scaler, train_cols
-
-def train_model(X_train_scaled,y_train, scaler, train_cols):
-    tree = DecisionTreeClassifier(class_weight='balanced', max_depth=9, random_state=42)
-    tree.fit(X_train_scaled, y_train)
-
-    logreg = LogisticRegression(C=1, max_iter=10000, class_weight='balanced')
-    logreg.fit(X_train_scaled, y_train)
-
-    svm = SVC(kernel='rbf', probability=True)
-    svm.fit(X_train_scaled, y_train)
-
-    mlp = MLPClassifier(hidden_layer_sizes=(32,16), max_iter=1000)
-    mlp.fit(X_train_scaled, y_train)
-    
-
-    # 5. Evaluate
-        # 6. Choose best model (example selects logistic regression)
-    best_model = logreg
-
-    # 7. Return everything needed for prediction
-    return best_model, scaler, train_cols, tree, svm, mlp
-
-def evaluation(logreg, tree, svm, mlp, X_test_scaled, y_test):
-    
-    t = 0
-    for i in range(10):
-        f = accuracy_score(y_test, mlp.predict(X_test_scaled))
-        if f > t:
-            t = f
-    results = []
-    results.append("Decision Tree accuracy:", accuracy_score(y_test, tree.predict(X_test_scaled)))
-    results.append("LogReg accuracy:", accuracy_score(y_test, logreg.predict(X_test_scaled)))
-    results.append("SVM accuracy:", accuracy_score(y_test, svm.predict(X_test_scaled)))
-    results.append("Best MLP accuracy out of 10 tries:", t)
-
-    models = {'Decision Tree': tree, 'LogReg': logreg, 'SVM': svm, 'MLP': mlp}
-    for name, model in models.items():
-        y_pred = model.predict(X_test_scaled)
-        a_win_rate = np.mean(y_pred)
-        b_win_rate = 1 - a_win_rate
-        print(f"{name} predicts Team A wins {a_win_rate:.2%}, Team B wins {b_win_rate:.2%}")
-
-    return results

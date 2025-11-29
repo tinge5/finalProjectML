@@ -1,6 +1,0 @@
-create two dataframes 
-totals, and avgs
-
-Create matchups vs teams
-train data with average matchups to predict winners
-compare with actual winners from that year
