@@ -15,7 +15,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
 
 def train_model(X_train_scaled,y_train, scaler, train_cols):
-    tree = DecisionTreeClassifier(class_weight='balanced', max_depth=9, random_state=42)
+    tree = DecisionTreeClassifier(class_weight='balanced', max_depth=5, random_state=42)
     tree.fit(X_train_scaled, y_train)
 
     logreg = LogisticRegression(C=1, max_iter=10000, class_weight='balanced')

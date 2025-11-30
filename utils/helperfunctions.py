@@ -103,7 +103,6 @@ def predict_future(matchups_future, model, scaler, train_cols):
         'posteam_B', 'Season_B',
         'proba_A_wins', 'winner', 'predicted_winner_team'
     ]]
-    df_future.to_csv("Predictions.csv", index=False)
     
     return df_future
     

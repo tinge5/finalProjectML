@@ -18,7 +18,7 @@ def prepare_data(matchups):
      # 1. Define features and target
     drop_cols = [
         'posteam_A','posteam_B','Season_A','Season_B',
-        'index_A','index_B','Win_B','Win_A','GameID','Touchdown','Touchdown_B', 'win', 'win_B'
+        'index_A','index_B','Win_B','Win_A','GameID','Touchdown','Touchdown_B', 'win', 'win_B', 'DefTeamScore_B', 'DefTeamScore', 'PosTeamScore_B', 'PosTeamScore' 
     ]
     X = matchups.drop(columns=drop_cols)
     y = matchups['Win_A']
