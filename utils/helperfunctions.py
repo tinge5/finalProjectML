@@ -131,8 +131,10 @@ def CreateGames_df(df):
                   
                   
               }))
-    games_df.rename(columns={'PuntResult': 'PuntBlocked'}, inplace=True)
     games_df['CompletionPercentage'] = games_df['PassOutcome'] / games_df['PassAttempt']
+
+    games_df.rename(columns={'PuntResult': 'PuntBlocked', 'PassOutcome': 'CompletedPasses', 'FieldGoalResult': 'FGMade'}, inplace=True)
+    
     yards = (df.groupby(['GameID', 'posteam',], as_index=False)
                 .agg({
                     'Yards.Gained': 'sum',
@@ -167,3 +169,14 @@ def plot_roc_curve(model, X_test, y_test, title="ROC Curve"):
     plt.legend(loc="lower right")
     plt.grid()
     plt.show()
+def logRegOddsRatios(model, cols):
+    coef = model.coef_[0]      # coefficients
+    features = cols      # feature names
+
+    coef_df = pd.DataFrame({
+        "feature": features,
+        "coefficient": coef
+    }).sort_values("coefficient", ascending=False)
+    coef_df["odds_ratio"] = coef_df["coefficient"].apply(lambda x: np.exp(x))
+    
+    return coef_df
