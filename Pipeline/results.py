@@ -17,6 +17,7 @@ warnings.filterwarnings("ignore")
 df = pd.read_csv(csv_path)
 
 games_df = CreateGames_df(df)
+touchdown_win = games_df.groupby('Touchdown', as_index=False)['Win'].mean()
 games = games_df[['GameID', 'posteam','Win', 'Season']]
 games_averages = game_avg(games_df)
 matchups = createMatchups(games)

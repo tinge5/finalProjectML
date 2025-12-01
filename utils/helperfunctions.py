@@ -118,8 +118,7 @@ def CreateGames_df(df):
                   'Fumble': 'sum',
                   'Touchdown': 'sum',
                   'FieldGoalResult': lambda x: (x == 'Good').sum(),
-                  'Penalty.Yards': 'sum',
-                  'Yards.Gained': 'mean',
+                  'Penalty.Yards': lambda x: x[df.loc[x.index, 'PenalizedTeam'] == df.loc[x.index, 'posteam']].sum(),          
                   'PuntResult': lambda x: (x == 'Blocked').sum(),
                   'Sack': 'sum',
                   'PosTeamScore': 'max',
@@ -133,7 +132,7 @@ def CreateGames_df(df):
               }))
     games_df['CompletionPercentage'] = games_df['PassOutcome'] / games_df['PassAttempt']
 
-    games_df.rename(columns={'PuntResult': 'PuntBlocked', 'PassOutcome': 'CompletedPasses', 'FieldGoalResult': 'FGMade'}, inplace=True)
+    games_df.rename(columns={'PuntResult': 'PuntBlocked', 'PassOutcome': 'CompletedPasses', 'FieldGoalResult': 'FGMade', 'Sack': 'SacksAllowed'}, inplace=True)
     
     yards = (df.groupby(['GameID', 'posteam',], as_index=False)
                 .agg({
