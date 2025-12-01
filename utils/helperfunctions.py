@@ -13,6 +13,9 @@ import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import roc_curve, auc
+import matplotlib.pyplot as plt
+
 
 def create_matchups_with_averages(matchups, games_averages):
     # Merge Team A season averages
@@ -145,3 +148,22 @@ def game_avg(games_df):
     games_averages = games_averages.sort_values(by=['win'], ascending=False)
 
     return games_averages
+
+def plot_roc_curve(model, X_test, y_test, title="ROC Curve"):
+    # Get predicted probabilities for the positive class (team A win = 1)
+    y_prob = model.predict_proba(X_test)[:, 1]
+
+    # Compute ROC curve values
+    fpr, tpr, thresholds = roc_curve(y_test, y_prob)
+    roc_auc = auc(fpr, tpr)
+
+    # Plot
+    plt.figure(figsize=(8, 6))
+    plt.plot(fpr, tpr, label=f"AUC = {roc_auc:.3f}")
+    plt.plot([0, 1], [0, 1], linestyle="--")  # baseline
+    plt.xlabel("False Positive Rate")
+    plt.ylabel("True Positive Rate")
+    plt.title(title)
+    plt.legend(loc="lower right")
+    plt.grid()
+    plt.show()

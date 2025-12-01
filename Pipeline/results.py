@@ -33,4 +33,3 @@ prediction = predict_future(Bestmatchup, best_model, scaler, train_cols)
 
 
 
-print(prediction)
