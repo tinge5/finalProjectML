@@ -111,6 +111,14 @@ def predict_future(matchups_future, model, scaler, train_cols):
     
 
 def CreateGames_df(df):
+    df['rushing_yards'] = df['Yards.Gained'] * df['RushAttempt']
+    df['passing_yards'] = df['Yards.Gained'] * df['PassAttempt']
+    df['return_yards'] = df.apply(
+        lambda row: row['Yards.Gained'] if row['PlayType'] in ['Kickoff', 'Punt']
+         and row['ReturnResult'] not in ['Touchback', 'Fair Catch'] 
+         else 0,
+        axis=1
+    )
     games_df = (df.groupby(['GameID', 'posteam'], as_index=False)
               .agg({
                   
@@ -126,19 +134,28 @@ def CreateGames_df(df):
                   'Season': 'first',
                   'FirstDown': 'sum',
                   'PassAttempt': 'sum',
+                  'RushAttempt': 'sum',
                   'PassOutcome': lambda x: (x == 'Complete').sum(),
                   
                   
               }))
     games_df['CompletionPercentage'] = games_df['PassOutcome'] / games_df['PassAttempt']
+    games_df = games_df.drop(columns=['PassOutcome', 'PassAttempt', 'RushAttempt'])
 
     games_df.rename(columns={'PuntResult': 'PuntBlocked', 'PassOutcome': 'CompletedPasses', 'FieldGoalResult': 'FGMade', 'Sack': 'SacksAllowed'}, inplace=True)
     
     yards = (df.groupby(['GameID', 'posteam',], as_index=False)
                 .agg({
+                    ''
                     'Yards.Gained': 'sum',
+                    'rushing_yards': 'sum',
+                    'passing_yards': 'sum',
+                    'return_yards': 'sum'
                 }))
-    games_df['Yards.Gained'] = yards['Yards.Gained']
+    games_df['total.Yards.Gained'] = yards['Yards.Gained']
+    games_df['rushing_yards'] = yards['rushing_yards']
+    games_df['passing_yards'] = yards['passing_yards']
+    games_df['return_yards_allowed'] = yards['return_yards']
     games_df['Win'] = (games_df['PosTeamScore'] > games_df['DefTeamScore']).astype(int)
     
     return games_df
